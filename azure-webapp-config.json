@@ -1,0 +1,20 @@
+{
+  "name": "moss-ira-calc",
+  "location": "East US",
+  "sku": "F1",
+  "properties": {
+    "siteConfig": {
+      "appSettings": [
+        {
+          "name": "WEBSITE_NODE_DEFAULT_VERSION",
+          "value": "20.11.0"
+        },
+        {
+          "name": "WEBSITE_RUN_FROM_PACKAGE",
+          "value": "1"
+        }
+      ],
+      "linuxFxVersion": "NODE:20-lts"
+    }
+  }
+}
