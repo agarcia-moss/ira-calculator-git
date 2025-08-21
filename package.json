@@ -41,7 +41,8 @@
     "electron": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-pack": "npm run build && electron-builder",
     "build-electron": "npm run build && electron-builder --publish=never",
-    "dist": "npm run build && electron-builder --publish=never"
+    "dist": "npm run build && electron-builder --publish=never",
+    "dist-publish": "npm run build && electron-builder --publish=always"
   },
   "eslintConfig": {
     "extends": [
@@ -70,7 +71,8 @@
     "files": [
       "build/**/*",
       "node_modules/**/*",
-      "public/electron.js"
+      "public/electron.js",
+      "app-update.yml"
     ],
     "mac": {
       "category": "public.app-category.productivity",
@@ -114,6 +116,13 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "agarcia-moss",
+        "repo": "ira-calculator-git"
+      }
+    ]
   }
 }

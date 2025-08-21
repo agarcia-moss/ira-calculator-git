@@ -1,0 +1,5 @@
+provider: github
+owner: agarcia-moss
+repo: ira-calculator-git
+channel: latest
+updaterCacheDirName: ira-calculator-updater
