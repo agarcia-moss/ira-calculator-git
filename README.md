@@ -1,10 +1,20 @@
-# IRA Calculator - Workforce Planning Tool
+# IRA Calculator - Desktop Workforce Planning Tool
+
+A cross-platform desktop application for calculating IRA (Inflation Reduction Act) compliance requirements for workforce planning. Built with React, TypeScript, and Electron.
 
 ## 🌐 **Access the Application**
 
-**Visit: [https://moss-ira-calc.azurewebsites.net/](https://moss-ira-calc.azurewebsites.net/)**
+### **Desktop Version (Recommended)**
+Download the latest version from [GitHub Releases](https://github.com/yourusername/ira-calculator-electron/releases) for your operating system.
 
-No downloads, installations, or technical knowledge required. Simply open the link in any modern web browser to start using the IRA Calculator.
+**Features:**
+- Native desktop experience
+- Automatic updates
+- Offline functionality
+- Enhanced performance
+
+### **Web Version (Legacy)**
+Visit: [https://moss-ira-calc.azurewebsites.net/](https://moss-ira-calc.azurewebsites.net/)
 
 ---
 
@@ -95,8 +105,38 @@ The application is designed to be intuitive and self-explanatory. However, if yo
 
 ---
 
+## 🖥️ **Desktop App Features**
+
+### **Enhanced Capabilities**
+- **Native Performance**: Faster loading and smoother interactions
+- **Offline Access**: Use the app without internet connectivity
+- **Automatic Updates**: Stay current with the latest features and bug fixes
+- **Cross-Platform**: Available for Windows, macOS, and Linux
+- **Professional Installation**: Install like any other desktop application
+
+### **Distribution Options**
+1. **Individual Installation**: Download and install on personal computers
+2. **Team Distribution**: Share installers with coworkers and team members
+3. **Enterprise Deployment**: Use MSI installers for Windows domain deployment
+4. **Update Management**: Automatic updates ensure everyone stays on the latest version
+
+### **Getting Started with Desktop Version**
+
+1. **Download**: Visit [GitHub Releases](https://github.com/yourusername/ira-calculator-electron/releases)
+2. **Install**: Run the installer for your operating system
+3. **Launch**: Open IRA Calculator from your applications menu
+4. **Update**: The app will check for updates automatically
+
+### **For Administrators**
+- Deploy MSI packages via Group Policy (Windows)
+- Distribute DMG files for macOS deployment
+- Use AppImage or DEB packages for Linux environments
+- Manage updates through GitHub releases
+
+---
+
 ## 🌟 **Ready to Start?**
 
-**Visit [https://moss-ira-calc.azurewebsites.net/](https://moss-ira-calc.azurewebsites.net/) now to begin your workforce planning journey.**
+**Download the [Desktop Version](https://github.com/yourusername/ira-calculator-electron/releases) for the best experience, or visit the [Web Version](https://moss-ira-calc.azurewebsites.net/) for immediate access.**
 
-*No downloads. No installations. No technical expertise required. Just open the link and start planning.* 
+*Professional desktop app with automatic updates, or instant web access - choose what works best for your workflow.* 
