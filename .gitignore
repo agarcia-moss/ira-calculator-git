@@ -20,19 +20,17 @@ dist/
 .idea/
 *.swp
 *.swo
+*~
 
-# OS files
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Logs
-logs/
-*.log
-
-# Electron cache
-.electron/
-.cache/
-
-# Temporary files
-*.tmp
-*.temp
+# Electron specific
+app/dist/
+release/

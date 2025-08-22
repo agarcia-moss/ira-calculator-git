@@ -3,13 +3,15 @@ import { TradeData } from './types';
 import TradeInputForm from './components/TradeInputForm';
 import TradeChart from './components/TradeChart';
 import ProjectOverview from './components/ProjectOverview';
-import { Calculator, Trash2, Edit2 } from 'lucide-react';
+import UpdateNotification from './components/UpdateNotification';
+import { Calculator, Trash2, Edit2, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 
 const App: React.FC = () => {
   const [trades, setTrades] = useState<TradeData[]>([]);
   const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null);
   const [editingTrade, setEditingTrade] = useState<TradeData | null>(null);
+  const [showUpdateNotification, setShowUpdateNotification] = useState<boolean>(false);
 
 
   const handleTradeAdd = (trade: TradeData) => {
@@ -46,9 +48,9 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <img 
-                src="/transparent_moss.png" 
-                alt="Company Logo" 
+              <img
+                src={process.env.PUBLIC_URL + "/transparent_moss.png"}
+                alt="Company Logo"
                 className="h-12 w-auto object-contain"
               />
             </div>
@@ -66,6 +68,15 @@ const App: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            {/* Settings Button */}
+            <button
+              onClick={() => setShowUpdateNotification(true)}
+              className="p-2 rounded-lg hover:bg-moss-monochrome-sage-veil transition-colors"
+              title="Check for Updates"
+            >
+              <Settings className="w-5 h-5 text-moss-monochrome-pine-vault" />
+            </button>
           </div>
         </div>
       </header>
@@ -182,6 +193,12 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Update Notification */}
+      <UpdateNotification
+        isVisible={showUpdateNotification}
+        onClose={() => setShowUpdateNotification(false)}
+      />
 
       {/* Footer */}
       <footer className="bg-white border-t border-moss-monochrome-sage-veil mt-16">
