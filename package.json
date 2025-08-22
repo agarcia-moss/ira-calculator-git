@@ -1,6 +1,6 @@
 {
   "name": "ira-calculator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "IRA Calculator for Apprenticeship Program",
   "private": true,
   "main": "public/electron.js",
