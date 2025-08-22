@@ -17,6 +17,8 @@
     "chart.js": "^4.4.0",
     "chartjs-plugin-annotation": "^3.1.0",
     "date-fns": "^2.30.0",
+    "electron-log": "^5.1.2",
+    "electron-updater": "^6.6.2",
     "lucide-react": "^0.294.0",
     "postcss": "^8.4.0",
     "react": "^18.2.0",
@@ -35,12 +37,14 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build-electron": "GENERATE_SOURCEMAP=false react-scripts build && electron-builder --publish=never",
+    "build-electron-prod": "GENERATE_SOURCEMAP=false react-scripts build --production && electron-builder --publish=never",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron-pack": "npm run build && electron-builder",
-    "build-electron": "npm run build && electron-builder --publish=never",
-    "dist": "npm run build && electron-builder --publish=never"
+    "electron-pack": "npm run build-electron-prod && electron-builder",
+    "dist": "npm run build-electron-prod && electron-builder --publish=never",
+    "dist-publish": "npm run build-electron-prod && electron-builder --publish=always"
   },
   "eslintConfig": {
     "extends": [
@@ -68,15 +72,25 @@
     },
     "files": [
       "build/**/*",
-      "node_modules/**/*",
-      "public/electron.js"
+      "!build/static/js/*.map",
+      "!build/static/css/*.map",
+      "public/electron.js",
+      "public/preload.js",
+      "app-update.yml",
+      "node_modules/electron-updater/**/*",
+      "!node_modules/**/*"
     ],
+    "asar": true,
+    "asarUnpack": [],
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ]
     },
@@ -84,7 +98,10 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
+          "arch": [
+            "x64",
+            "ia32"
+          ]
         }
       ]
     },
@@ -92,17 +109,28 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "deb",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "agarcia-moss",
+        "repo": "ira-calculator-git"
+      }
+    ]
   }
 }

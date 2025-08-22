@@ -1,6 +1,14 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, dialog, Notification } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
+
+// Auto-updater setup
+const log = require('electron-log');
+const { autoUpdater } = require('electron-updater');
+
+// Configure logging
+log.transports.file.level = 'info';
+autoUpdater.logger = log;
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -52,8 +60,79 @@ function createWindow() {
   });
 }
 
+// Auto-updater functions
+function sendStatusToWindow(text) {
+  log.info(text);
+  if (mainWindow && mainWindow.webContents) {
+    mainWindow.webContents.send('message', text);
+  }
+}
+
+function showNotification(title, body) {
+  if (Notification.isSupported()) {
+    new Notification({
+      title: title,
+      body: body,
+      icon: path.join(__dirname, 'transparent_moss.png')
+    }).show();
+  }
+}
+
+// Auto-updater event listeners
+autoUpdater.on('checking-for-update', () => {
+  sendStatusToWindow('Checking for update...');
+});
+
+autoUpdater.on('update-available', (info) => {
+  sendStatusToWindow('Update available.');
+  showNotification('Update Available', `Version ${info.version} is available and will be installed on next restart.`);
+});
+
+autoUpdater.on('update-not-available', (info) => {
+  sendStatusToWindow('Update not available.');
+});
+
+autoUpdater.on('error', (err) => {
+  sendStatusToWindow('Error in auto-updater. ' + err);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  let log_message = "Download speed: " + progressObj.bytesPerSecond;
+  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+  log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+  sendStatusToWindow(log_message);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  sendStatusToWindow('Update downloaded');
+
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['Restart', 'Later'],
+    title: 'Application Update',
+    message: process.platform === 'win32' ? info.releaseNotes : info.releaseName,
+    detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+  };
+
+  dialog.showMessageBox(dialogOpts).then((returnValue) => {
+    if (returnValue.response === 0) autoUpdater.quitAndInstall();
+  });
+});
+
+// Check for updates (only in production)
+function checkForUpdates() {
+  if (!isDev) {
+    autoUpdater.checkForUpdatesAndNotify();
+  }
+}
+
 // This method will be called when Electron has finished initialization
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+
+  // Check for updates after window is created
+  setTimeout(checkForUpdates, 2000);
+});
 
 // Quit when all windows are closed, except on macOS
 app.on('window-all-closed', () => {

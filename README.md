@@ -2,9 +2,19 @@
 
 ## 🌐 **Access the Application**
 
+### **Desktop Application (Recommended)**
+Download the latest version from [GitHub Releases](https://github.com/agarcia-moss/ira-calculator-git/releases)
+
+**Features:**
+- ✨ **Auto-updates**: Automatically checks for and installs updates
+- 🖥️ **Native Experience**: Runs as a standalone desktop application
+- 🔄 **Always Up-to-date**: Get new features and bug fixes automatically
+- 📱 **Cross-platform**: Available for macOS, Windows, and Linux
+
+### **Web Application**
 **Visit: [https://moss-ira-calc.azurewebsites.net/](https://moss-ira-calc.azurewebsites.net/)**
 
-No downloads, installations, or technical knowledge required. Simply open the link in any modern web browser to start using the IRA Calculator.
+No downloads required - use directly in your web browser.
 
 ---
 
@@ -95,8 +105,69 @@ The application is designed to be intuitive and self-explanatory. However, if yo
 
 ---
 
+## 📦 **Releases & Updates**
+
+### **Latest Release: v1.0.0**
+
+The desktop application includes automatic update functionality:
+- **Automatic Updates**: The app checks for updates on startup
+- **Background Downloads**: Updates download silently in the background
+- **User-Friendly Prompts**: You'll be notified when updates are ready to install
+- **One-Click Updates**: Restart the application to apply updates instantly
+
+### **Release Channels**
+- **Stable**: Production-ready releases from the main branch
+- **Beta**: Pre-release versions with new features (if available)
+
+### **Installation**
+1. Download the appropriate installer for your operating system from [GitHub Releases](https://github.com/agarcia-moss/ira-calculator-git/releases)
+2. Run the installer and follow the setup instructions
+3. The application will automatically check for updates on future launches
+
+---
+
+## 🛠️ **Development**
+
+### **Prerequisites**
+- Node.js 18+
+- npm or yarn
+
+### **Setup**
+```bash
+# Clone the repository
+git clone https://github.com/agarcia-moss/ira-calculator-git.git
+cd ira-calculator-git
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+
+# For Electron development
+npm run electron
+```
+
+### **Building for Production**
+```bash
+# Build desktop application
+npm run build-electron-prod
+
+# Build web application
+npm run build
+```
+
+### **Creating a New Release**
+1. Update version in `package.json`
+2. Update `CHANGELOG.md` with new features/fixes
+3. Commit changes
+4. Create and push a new git tag: `git tag v1.0.1 && git push origin v1.0.1`
+5. GitHub Actions will automatically build and publish the release
+
+---
+
 ## 🌟 **Ready to Start?**
 
-**Visit [https://moss-ira-calc.azurewebsites.net/](https://moss-ira-calc.azurewebsites.net/) now to begin your workforce planning journey.**
+**Download the desktop app from [GitHub Releases](https://github.com/agarcia-moss/ira-calculator-git/releases) for the best experience!**
 
-*No downloads. No installations. No technical expertise required. Just open the link and start planning.* 
+*Or visit the web version at [https://moss-ira-calc.azurewebsites.net/](https://moss-ira-calc.azurewebsites.net/)* 
