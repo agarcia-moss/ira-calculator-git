@@ -1,6 +1,6 @@
-const { app, BrowserWindow, Menu, dialog, Notification } = require('electron');
+const { app, BrowserWindow, Menu, dialog, Notification, shell } = require('electron');
 const path = require('path');
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = !app.isPackaged;
 
 // Auto-updater setup
 const log = require('electron-log');
@@ -9,6 +9,11 @@ const { autoUpdater } = require('electron-updater');
 // Configure logging
 log.transports.file.level = 'info';
 autoUpdater.logger = log;
+
+// Configure auto-updater to check for pre-releases if in beta
+autoUpdater.allowPrerelease = false;
+autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = true;
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -31,10 +36,18 @@ function createWindow() {
     title: 'IRA Calculator'
   });
 
-  // Load the app
+  // Load the app with error handling
   const startUrl = isDev
     ? 'http://localhost:3000'
     : `file://${path.join(__dirname, '../build/index.html')}`;
+
+  // Handle file loading errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    log.error(`Failed to load: ${errorDescription} (${errorCode})`);
+    if (!isDev && errorCode === -6) { // ERR_FILE_NOT_FOUND
+      log.error('Build files not found. Make sure to run "npm run build" first.');
+    }
+  });
 
   mainWindow.loadURL(startUrl);
 
@@ -55,8 +68,17 @@ function createWindow() {
 
   // Handle external links
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    require('electron').shell.openExternal(url);
+    shell.openExternal(url);
     return { action: 'deny' };
+  });
+
+  // Handle window errors
+  mainWindow.webContents.on('crashed', (event, killed) => {
+    log.error(`Renderer process crashed. Killed: ${killed}`);
+  });
+
+  mainWindow.on('unresponsive', () => {
+    log.error('Window became unresponsive');
   });
 }
 
@@ -94,6 +116,7 @@ autoUpdater.on('update-not-available', (info) => {
 
 autoUpdater.on('error', (err) => {
   sendStatusToWindow('Error in auto-updater. ' + err);
+  log.error('Auto-updater error:', err);
 });
 
 autoUpdater.on('download-progress', (progressObj) => {
@@ -122,7 +145,11 @@ autoUpdater.on('update-downloaded', (info) => {
 // Check for updates (only in production)
 function checkForUpdates() {
   if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify();
+    try {
+      autoUpdater.checkForUpdatesAndNotify();
+    } catch (error) {
+      log.error('Error checking for updates:', error);
+    }
   }
 }
 
@@ -154,4 +181,31 @@ app.on('activate', () => {
 // In development, hide the menu bar
 if (isDev) {
   Menu.setApplicationMenu(null);
+}
+
+// Handle certificate errors
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  if (isDev) {
+    // Ignore certificate errors in development
+    event.preventDefault();
+    callback(true);
+  } else {
+    // Use default behavior in production
+    callback(false);
+  }
+});
+
+// Prevent multiple instances
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    // Someone tried to run a second instance, focus our window instead
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
 }

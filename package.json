@@ -6,8 +6,12 @@
   "main": "public/electron.js",
   "homepage": "./",
   "author": {
-    "name": "Your Name",
-    "email": "your.email@example.com"
+    "name": "IRA Calculator Team",
+    "email": "support@ira-calculator.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agarcia-moss/ira-calculator-git.git"
   },
   "dependencies": {
     "@types/node": "^20.0.0",
@@ -30,21 +34,26 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
-    "electron": "^37.3.1",
-    "electron-builder": "^26.0.12",
+    "cross-env": "^7.0.3",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
     "wait-on": "^8.0.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build-electron": "GENERATE_SOURCEMAP=false react-scripts build && electron-builder --publish=never",
-    "build-electron-prod": "GENERATE_SOURCEMAP=false react-scripts build && electron-builder --publish=never",
+    "build-electron": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
+    "build-electron-prod": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test --passWithNoTests",
     "eject": "react-scripts eject",
     "electron": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-pack": "npm run build-electron-prod && electron-builder",
     "dist": "npm run build-electron-prod && electron-builder --publish=never",
-    "dist-publish": "npm run build-electron-prod && electron-builder --publish=always"
+    "dist:win": "npm run build-electron-prod && electron-builder --win --publish=never",
+    "dist:mac": "npm run build-electron-prod && electron-builder --mac --publish=never",
+    "dist:linux": "npm run build-electron-prod && electron-builder --linux --publish=never",
+    "dist-publish": "npm run build-electron-prod && electron-builder --publish=always",
+    "postinstall": "electron-builder install-app-deps"
   },
   "eslintConfig": {
     "extends": [
@@ -67,9 +76,12 @@
   "build": {
     "appId": "com.ira.calculator",
     "productName": "IRA Calculator",
+    "artifactName": "${productName}-${version}.${ext}",
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "build"
     },
+    "compression": "normal",
     "files": [
       "build/**/*",
       "!build/static/js/*.map",
@@ -123,14 +135,40 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "public/transparent_moss.png",
+      "uninstallerIcon": "public/transparent_moss.png",
+      "artifactName": "${productName} Setup ${version}.${ext}"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "protocols": {
+      "name": "ira-calculator-protocol",
+      "schemes": ["ira-calculator"]
     },
     "publish": [
       {
         "provider": "github",
         "owner": "agarcia-moss",
-        "repo": "ira-calculator-git"
-      }
-    ]
-  }
+              "repo": "ira-calculator-git",
+      "releaseType": "release"
+    }
+  ]
+ }
 }
