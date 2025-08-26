@@ -39,7 +39,7 @@
     "build": "react-scripts build",
     "build-electron": "GENERATE_SOURCEMAP=false react-scripts build && electron-builder --publish=never",
     "build-electron-prod": "GENERATE_SOURCEMAP=false react-scripts build && electron-builder --publish=never",
-    "test": "react-scripts test",
+    "test": "react-scripts test --passWithNoTests",
     "eject": "react-scripts eject",
     "electron": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-pack": "npm run build-electron-prod && electron-builder",

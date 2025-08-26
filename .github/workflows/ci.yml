@@ -1,16 +1,14 @@
-name: Release
+name: CI
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  release:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+  test:
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check out Git repository
@@ -28,7 +26,8 @@ jobs:
     - name: Run tests
       run: npm test
 
-    - name: Build and publish Electron app
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: npm run dist-publish
+    - name: Build React app
+      run: npm run build
+
+    - name: Build Electron app (without publishing)
+      run: npm run dist

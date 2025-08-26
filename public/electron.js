@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, dialog, Notification } = require('electron');
+const { app, BrowserWindow, Menu, dialog, Notification, ipcMain } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -12,6 +12,21 @@ autoUpdater.logger = log;
 
 // Keep a global reference of the window object
 let mainWindow;
+
+// IPC handlers for renderer process communication
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
+});
+
+ipcMain.handle('check-for-updates', () => {
+  if (!isDev) {
+    autoUpdater.checkForUpdatesAndNotify();
+  }
+});
+
+ipcMain.handle('open-external', (event, url) => {
+  require('electron').shell.openExternal(url);
+});
 
 function createWindow() {
   // Create the browser window
@@ -64,7 +79,7 @@ function createWindow() {
 function sendStatusToWindow(text) {
   log.info(text);
   if (mainWindow && mainWindow.webContents) {
-    mainWindow.webContents.send('message', text);
+    mainWindow.webContents.send('update-message', text);
   }
 }
 
