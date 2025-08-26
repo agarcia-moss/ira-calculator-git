@@ -47,24 +47,16 @@ jobs:
             
             ## Installation
             
-            Download the appropriate installer for your platform below:
-            - **Windows**: `IRA-Calculator-Setup-*.exe` (NSIS installer)
-            - **macOS**: `IRA-Calculator-*.dmg` (Universal binary for Intel and Apple Silicon)
-            - **Linux**: `IRA-Calculator-*.AppImage` or `ira-calculator_*.deb`
+            Download the appropriate installer for your Mac below:
+            - **Intel Mac**: `IRA-Calculator-*-x64.dmg`
+            - **Apple Silicon Mac**: `IRA-Calculator-*-arm64.dmg`
+            
+            Not sure which version you need? 
+            - Apple menu → About This Mac → Check if it says "Intel" or "Apple M1/M2/M3"
 
-  build:
+  build-mac:
     needs: create-release
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            platform: linux
-          - os: macos-latest
-            platform: mac
-          - os: windows-latest
-            platform: win
-
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
 
     steps:
       - name: Check out Git repository
@@ -82,65 +74,24 @@ jobs:
       - name: Build React app
         run: npm run build-electron-prod
 
-      # Linux specific setup
-      - name: Install Linux dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libdrm2 libgbm1 libxcb-dri3-0 libxkbcommon0 libgtk-3-0
-
-      # Build Electron app
-      - name: Build Electron app
+      - name: Build Electron app for macOS
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ "${{ matrix.platform }}" = "mac" ]; then
-            npm run dist:mac
-          elif [ "${{ matrix.platform }}" = "win" ]; then
-            npm run dist:win
-          else
-            npm run dist:linux
-          fi
-        shell: bash
+        run: npm run dist:mac:x64
 
-      # Upload Windows artifacts
-      - name: Upload Windows artifacts
-        if: matrix.os == 'windows-latest'
+      # Upload Intel version
+      - name: Upload macOS Intel DMG
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/IRA Calculator Setup ${{ github.event.inputs.tag || github.ref_name }}.exe
-          asset_name: IRA-Calculator-Setup-${{ github.event.inputs.tag || github.ref_name }}.exe
-          asset_content_type: application/x-msdownload
-
-      - name: Upload Windows artifacts (portable)
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/IRA Calculator ${{ github.event.inputs.tag || github.ref_name }}.exe
-          asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-portable.exe
-          asset_content_type: application/x-msdownload
-        continue-on-error: true
-
-      # Upload macOS artifacts
-      - name: Upload macOS artifacts
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}.dmg
-          asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}.dmg
+          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}-x64.dmg
+          asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-x64.dmg
           asset_content_type: application/x-apple-diskimage
 
-      - name: Upload macOS ARM artifacts
-        if: matrix.os == 'macos-latest'
+      # Upload Apple Silicon version
+      - name: Upload macOS Apple Silicon DMG
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -149,45 +100,33 @@ jobs:
           asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}-arm64.dmg
           asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-arm64.dmg
           asset_content_type: application/x-apple-diskimage
+
+      # Upload Intel ZIP
+      - name: Upload macOS Intel ZIP
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}-x64-mac.zip
+          asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-x64-mac.zip
+          asset_content_type: application/zip
         continue-on-error: true
 
-      # Upload Linux artifacts
-      - name: Upload Linux AppImage
-        if: matrix.os == 'ubuntu-latest'
+      # Upload Apple Silicon ZIP
+      - name: Upload macOS Apple Silicon ZIP
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}.AppImage
-          asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}.AppImage
-          asset_content_type: application/x-executable
+          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}-arm64-mac.zip
+          asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-arm64-mac.zip
+          asset_content_type: application/zip
+        continue-on-error: true
 
-      - name: Upload Linux deb
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/ira-calculator_${{ github.event.inputs.tag || github.ref_name }}_amd64.deb
-          asset_name: ira-calculator_${{ github.event.inputs.tag || github.ref_name }}_amd64.deb
-          asset_content_type: application/x-debian-package
-
-      # Upload auto-update files
-      - name: Upload latest.yml (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/latest.yml
-          asset_name: latest.yml
-          asset_content_type: text/yaml
-
-      - name: Upload latest-mac.yml (macOS)
-        if: matrix.os == 'macos-latest'
+      # Upload auto-update file
+      - name: Upload latest-mac.yml
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -195,15 +134,4 @@ jobs:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: dist/latest-mac.yml
           asset_name: latest-mac.yml
-          asset_content_type: text/yaml
-
-      - name: Upload latest-linux.yml (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/latest-linux.yml
-          asset_name: latest-linux.yml
           asset_content_type: text/yaml

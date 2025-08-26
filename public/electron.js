@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, dialog, Notification, shell } = require('electron');
+const { app, BrowserWindow, Menu, dialog, Notification, shell, ipcMain } = require('electron');
 const path = require('path');
 const isDev = !app.isPackaged;
 
@@ -86,7 +86,7 @@ function createWindow() {
 function sendStatusToWindow(text) {
   log.info(text);
   if (mainWindow && mainWindow.webContents) {
-    mainWindow.webContents.send('message', text);
+    mainWindow.webContents.send('update-message', text);
   }
 }
 
@@ -106,16 +106,29 @@ autoUpdater.on('checking-for-update', () => {
 });
 
 autoUpdater.on('update-available', (info) => {
-  sendStatusToWindow('Update available.');
-  showNotification('Update Available', `Version ${info.version} is available and will be installed on next restart.`);
+  sendStatusToWindow(`Update available: v${info.version}`);
+  showNotification('Update Available', `Version ${info.version} is available and will be downloaded automatically.`);
 });
 
 autoUpdater.on('update-not-available', (info) => {
-  sendStatusToWindow('Update not available.');
+  sendStatusToWindow('You have the latest version!');
 });
 
 autoUpdater.on('error', (err) => {
-  sendStatusToWindow('Error in auto-updater. ' + err);
+  let errorMessage = 'Update check failed';
+  
+  // Provide more user-friendly error messages
+  if (err.message.includes('ERR_INTERNET_DISCONNECTED')) {
+    errorMessage = 'No internet connection';
+  } else if (err.message.includes('GitHub')) {
+    errorMessage = 'Unable to connect to update server';
+  } else if (err.message.includes('404')) {
+    errorMessage = 'No updates available yet (no releases published)';
+  } else {
+    errorMessage = `Update error: ${err.message}`;
+  }
+  
+  sendStatusToWindow(errorMessage);
   log.error('Auto-updater error:', err);
 });
 
@@ -152,6 +165,32 @@ function checkForUpdates() {
     }
   }
 }
+
+// IPC handlers
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
+});
+
+ipcMain.handle('check-for-updates', async () => {
+  try {
+    if (isDev) {
+      sendStatusToWindow('Update check disabled in development mode');
+      return;
+    }
+    await autoUpdater.checkForUpdatesAndNotify();
+  } catch (error) {
+    log.error('Error checking for updates:', error);
+    sendStatusToWindow('Failed to check for updates: ' + error.message);
+  }
+});
+
+ipcMain.handle('open-external', async (event, url) => {
+  try {
+    await shell.openExternal(url);
+  } catch (error) {
+    log.error('Error opening external URL:', error);
+  }
+});
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {

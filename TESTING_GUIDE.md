@@ -26,34 +26,21 @@ npm run electron
 # - Hot reload works (make a change and save)
 ```
 
-### Step 3: Build for Your Platform
+### Step 3: Build for macOS
 
-#### Windows
 ```bash
-npm run dist:win
-
-# Output will be in:
-# - dist/IRA Calculator Setup {version}.exe (installer)
-# - dist/IRA Calculator {version} Portable.exe (if configured)
-```
-
-#### macOS
-```bash
+# Build for both Intel and Apple Silicon
 npm run dist:mac
 
-# Output will be in:
-# - dist/IRA Calculator-{version}.dmg
-# - dist/IRA Calculator-{version}-arm64.dmg (if on Apple Silicon)
-```
-
-#### Linux
-```bash
-npm run dist:linux
+# Or use the build script
+./build-mac.sh
 
 # Output will be in:
-# - dist/IRA Calculator-{version}.AppImage
-# - dist/ira-calculator_{version}_amd64.deb
+# - dist/IRA Calculator-{version}-x64.dmg (Intel)
+# - dist/IRA Calculator-{version}-arm64.dmg (Apple Silicon)
 ```
+
+**Note**: The build process will create both architectures regardless of which Mac you're building on.
 
 ### Step 4: Test the Built Application
 1. Install/run the built application
@@ -104,23 +91,22 @@ git push origin v1.0.1
 ### Step 4: Monitor Release Build
 1. Go to Actions tab
 2. Click on the running "Build and Release" workflow
-3. Monitor progress for all three platforms
-4. Each platform should:
+3. Monitor progress for macOS build
+4. The build should:
    - Check out code ✓
    - Install Node.js ✓
    - Install dependencies ✓
    - Build React app ✓
-   - Build Electron app ✓
-   - Upload artifacts ✓
+   - Build Electron app for both architectures ✓
+   - Upload both DMG files ✓
 
 ### Step 5: Verify GitHub Release
 1. Go to "Releases" section of your repository
 2. You should see a draft release for your version
 3. Verify all artifacts are uploaded:
-   - Windows: `.exe` installer
-   - macOS: `.dmg` file(s)
-   - Linux: `.AppImage` and `.deb` files
-   - Auto-update files: `latest*.yml`
+   - macOS Intel: `IRA-Calculator-v{VERSION}-x64.dmg`
+   - macOS Apple Silicon: `IRA-Calculator-v{VERSION}-arm64.dmg`
+   - Auto-update file: `latest-mac.yml`
 4. Edit release notes using the template
 5. Publish the release when ready
 
@@ -132,26 +118,28 @@ git push origin v1.0.1
 3. Verify update notification appears
 4. Test the update installation process
 
-### Platform-Specific Tests
+### macOS-Specific Tests
 
-#### Windows
-- [ ] Installer runs without admin rights (per-user install)
-- [ ] Start menu shortcut created
-- [ ] Desktop shortcut created (if selected)
-- [ ] Uninstaller works correctly
-- [ ] App appears in Add/Remove Programs
-
-#### macOS
+#### Intel Mac (x64)
 - [ ] DMG mounts correctly
 - [ ] Drag-to-Applications works
-- [ ] App runs without security warnings (if notarized)
-- [ ] Works on both Intel and Apple Silicon
+- [ ] App launches successfully
+- [ ] No Rosetta translation warning
+- [ ] Performance is native
 
-#### Linux
-- [ ] AppImage runs with execute permission
-- [ ] .deb installs via dpkg or apt
-- [ ] Desktop integration works
-- [ ] App appears in application menu
+#### Apple Silicon Mac (arm64)
+- [ ] DMG mounts correctly
+- [ ] Drag-to-Applications works
+- [ ] App launches successfully
+- [ ] Activity Monitor shows "Kind: Apple" (not "Intel")
+- [ ] No performance issues
+
+#### Both Architectures
+- [ ] First launch requires right-click → Open
+- [ ] Auto-updater initializes
+- [ ] All features work correctly
+- [ ] Window resizing works
+- [ ] Menu bar integration correct
 
 ## 🛠️ Troubleshooting
 
@@ -165,10 +153,11 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-#### Platform-specific build errors
-- **Windows**: Install Visual Studio Build Tools
-- **macOS**: Install Xcode Command Line Tools: `xcode-select --install`
-- **Linux**: Install required libraries: `sudo apt-get install libgtk-3-0 libnotify4 libnss3`
+#### macOS build errors
+- Install Xcode Command Line Tools: `xcode-select --install`
+- Ensure you have enough disk space (need ~5GB free)
+- If builds fail, try: `npm run postinstall` to rebuild native dependencies
+- For code signing issues, build unsigned for testing
 
 ### GitHub Actions Issues
 

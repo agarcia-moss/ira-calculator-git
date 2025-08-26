@@ -42,7 +42,10 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({ isVisible, onCl
     // Listen for update messages
     const handleUpdateMessage = (event: any, message: string) => {
       setUpdateMessage(message);
-      setIsChecking(false);
+      // Only stop checking if it's not a progress message
+      if (!message.includes('Download') && !message.includes('%')) {
+        setIsChecking(false);
+      }
     };
 
     if (window.electronAPI) {
@@ -72,8 +75,14 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({ isVisible, onCl
 
   const getStatusIcon = () => {
     if (isChecking) return <Download className="w-5 h-5 text-blue-500 animate-pulse" />;
-    if (updateMessage.includes('available')) return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+    if (updateMessage.includes('Update available')) return <AlertCircle className="w-5 h-5 text-yellow-500" />;
     if (updateMessage.includes('downloaded')) return <CheckCircle className="w-5 h-5 text-green-500" />;
+    if (updateMessage.includes('failed') || updateMessage.includes('error') || updateMessage.includes('Error')) {
+      return <AlertCircle className="w-5 h-5 text-red-500" />;
+    }
+    if (updateMessage.includes('not available') || updateMessage.includes('up to date')) {
+      return <CheckCircle className="w-5 h-5 text-green-500" />;
+    }
     return <CheckCircle className="w-5 h-5 text-gray-500" />;
   };
 

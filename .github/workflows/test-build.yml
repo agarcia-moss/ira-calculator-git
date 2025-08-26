@@ -8,12 +8,10 @@ on:
 
 jobs:
   test-build:
+    runs-on: macos-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: [18, 20]
-
-    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -38,32 +36,24 @@ jobs:
       - name: Build React app
         run: npm run build
 
-      - name: Install Linux dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libdrm2 libgbm1 libxcb-dri3-0
-
-      - name: Test Electron build
+      - name: Test Electron build for macOS
         run: |
           npm run build-electron-prod
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            npm run dist:linux -- --publish=never
-          elif [ "${{ matrix.os }}" = "windows-latest" ]; then
-            npm run dist:win -- --publish=never
-          else
-            npm run dist:mac -- --publish=never
-          fi
-        shell: bash
+          npm run dist:mac -- --publish=never
+
+      - name: Verify build artifacts
+        run: |
+          echo "Checking for Intel build..."
+          ls -la "dist/IRA Calculator-"*"-x64.dmg" || echo "Intel DMG not found"
+          echo "Checking for Apple Silicon build..."
+          ls -la "dist/IRA Calculator-"*"-arm64.dmg" || echo "ARM64 DMG not found"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         if: matrix.node-version == 18
         with:
-          name: test-builds-${{ matrix.os }}
+          name: test-builds-macos
           path: |
-            dist/*.exe
             dist/*.dmg
-            dist/*.AppImage
-            dist/*.deb
+            dist/*.zip
           retention-days: 7

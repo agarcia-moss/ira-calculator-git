@@ -6,8 +6,7 @@ directories:
   output: dist
   buildResources: build
 
-# Include version in artifact names
-artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+# Include version and architecture in artifact names
 
 # Files to include in the build
 files:
@@ -28,68 +27,27 @@ asarUnpack:
 # macOS specific
 mac:
   category: public.app-category.productivity
+  artifactName: ${productName}-${version}-${arch}.${ext}
   hardenedRuntime: true
   gatekeeperAssess: false
-  entitlements: build/entitlements.mac.plist
-  entitlementsInherit: build/entitlements.mac.plist
   target:
     - target: dmg
-      arch:
-        - x64
-        - arm64
+      arch: [x64, arm64]
     - target: zip
-      arch:
-        - x64
-        - arm64
+      arch: [x64, arm64]
+  icon: public/transparent_moss.png
 
-# Windows specific
-win:
-  target:
-    - target: nsis
-      arch:
-        - x64
-        - ia32
-    - target: portable
-      arch:
-        - x64
-
-nsis:
-  oneClick: false
-  perMachine: false
-  allowElevation: true
-  allowToChangeInstallationDirectory: true
-  createDesktopShortcut: true
-  createStartMenuShortcut: true
-  deleteAppDataOnUninstall: false
-  artifactName: ${productName} Setup ${version}.${ext}
-  shortcutName: IRA Calculator
-  uninstallDisplayName: IRA Calculator
-  license: LICENSE
-
-portable:
-  artifactName: ${productName} ${version} Portable.${ext}
-
-# Linux specific
-linux:
-  target:
-    - target: AppImage
-      arch:
-        - x64
-    - target: deb
-      arch:
-        - x64
-    - target: rpm
-      arch:
-        - x64
-  category: Office
-  synopsis: IRA Calculator for Apprenticeship Program
-  description: A comprehensive calculator for IRA apprenticeship programs
-  desktop:
-    StartupNotify: true
-
-appImage:
-  artifactName: ${productName}-${version}.${ext}
-  license: LICENSE
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+  window:
+    width: 540
+    height: 380
 
 # Auto-update configuration
 publish:
@@ -106,7 +64,3 @@ publish:
 #     appleId: your-apple-id@example.com
 #     appleIdPassword: "@keychain:AC_PASSWORD"
 #     teamId: XXXXXXXXXX
-
-# win:
-#   certificateFile: path/to/certificate.pfx
-#   certificatePassword: ${env.CERTIFICATE_PASSWORD}
