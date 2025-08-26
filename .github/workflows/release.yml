@@ -72,6 +72,8 @@ jobs:
         run: npm ci
 
       - name: Build React app
+        env:
+          CI: false
         run: npm run build-electron-prod
 
       - name: Build Electron app for macOS
