@@ -76,10 +76,21 @@ jobs:
           CI: false
         run: npm run build-electron-prod
 
-      - name: Build Electron app for macOS
+      # Get version from package.json
+      - name: Get version
+        id: package-version
+        run: echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+        
+      - name: Build Electron app for macOS (both architectures)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run dist:mac:x64
+        run: |
+          npm run dist:mac:x64
+          npm run dist:mac:arm64
+      
+      # List generated files for debugging
+      - name: List dist contents
+        run: ls -la dist/
 
       # Upload Intel version
       - name: Upload macOS Intel DMG
@@ -88,7 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}-x64.dmg
+          asset_path: dist/IRA Calculator-${{ steps.package-version.outputs.version }}-x64.dmg
           asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-x64.dmg
           asset_content_type: application/x-apple-diskimage
 
@@ -99,7 +110,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}-arm64.dmg
+          asset_path: dist/IRA Calculator-${{ steps.package-version.outputs.version }}-arm64.dmg
           asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-arm64.dmg
           asset_content_type: application/x-apple-diskimage
 
@@ -110,7 +121,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}-x64-mac.zip
+          asset_path: dist/IRA Calculator-${{ steps.package-version.outputs.version }}-x64-mac.zip
           asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-x64-mac.zip
           asset_content_type: application/zip
         continue-on-error: true
@@ -122,7 +133,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/IRA Calculator-${{ github.event.inputs.tag || github.ref_name }}-arm64-mac.zip
+          asset_path: dist/IRA Calculator-${{ steps.package-version.outputs.version }}-arm64-mac.zip
           asset_name: IRA-Calculator-${{ github.event.inputs.tag || github.ref_name }}-arm64-mac.zip
           asset_content_type: application/zip
         continue-on-error: true
