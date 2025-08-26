@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, dialog, Notification } = require('electron');
+const { app, BrowserWindow, Menu, dialog, Notification, ipcMain } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -64,7 +64,7 @@ function createWindow() {
 function sendStatusToWindow(text) {
   log.info(text);
   if (mainWindow && mainWindow.webContents) {
-    mainWindow.webContents.send('message', text);
+    mainWindow.webContents.send('update-message', text);
   }
 }
 
@@ -117,6 +117,21 @@ autoUpdater.on('update-downloaded', (info) => {
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) autoUpdater.quitAndInstall();
   });
+});
+
+// IPC handlers
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
+});
+
+ipcMain.handle('check-for-updates', () => {
+  if (!isDev) {
+    return autoUpdater.checkForUpdatesAndNotify();
+  }
+});
+
+ipcMain.handle('open-external', (event, url) => {
+  require('electron').shell.openExternal(url);
 });
 
 // Check for updates (only in production)
